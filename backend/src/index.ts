@@ -11,9 +11,11 @@ import passport from './config/passport.js';
 import authRoutes from './routes/authRoutes.js';
 import v1Routes from './routes/v1';
 import webhookRoutes from './routes/webhook.routes';
+import contractEventRoutes from './routes/contractEventRoutes.js';
 import { initializeSocket, emitTransactionUpdate } from './services/socketService';
 import { HealthController } from './controllers/healthController';
 import { ThrottlingService } from './services/throttlingService';
+import { ContractEventIndexerService } from './services/contractEventIndexerService.js';
 
 dotenv.config();
 
@@ -35,6 +37,7 @@ app.use(apiVersionMiddleware);
 
 // Routes
 app.use('/auth', authRoutes);
+app.use('/api/events', contractEventRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok' });
@@ -42,4 +45,20 @@ app.get('/health', (_req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  const shouldRunIndexer = process.env.ENABLE_CONTRACT_EVENT_INDEXER !== 'false';
+  if (shouldRunIndexer) {
+    void (async () => {
+      await ContractEventIndexerService.initialize();
+      ContractEventIndexerService.start();
+      console.log('Contract event indexer started');
+    })();
+  }
+});
+
+process.on('SIGTERM', () => {
+  ContractEventIndexerService.stop();
+});
+
+process.on('SIGINT', () => {
+  ContractEventIndexerService.stop();
 });
