@@ -50,7 +50,7 @@ export default function RevenueSplitDashboard() {
   const [contractError, setContractError] = useState<ContractErrorDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { address, connect } = useWallet();
+  const { address, connect, requireWallet } = useWallet();
   const { sign } = useWalletSigning();
   const { notifyError, notifySuccess } = useNotification();
 
@@ -147,8 +147,8 @@ export default function RevenueSplitDashboard() {
   };
 
   const handleSaveAllocations = async () => {
-    if (!address) {
-      notifyError('Wallet required', 'Connect a wallet before updating allocations.');
+    const walletAddress = await requireWallet();
+    if (!walletAddress) {
       return;
     }
 
@@ -182,7 +182,7 @@ export default function RevenueSplitDashboard() {
 
       const { txHash } = await updateRevenueAllocations({
         contractId,
-        sourceAddress: address,
+        sourceAddress: walletAddress,
         allocations,
         signTransaction: sign,
       });

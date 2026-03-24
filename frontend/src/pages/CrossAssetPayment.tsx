@@ -16,7 +16,7 @@ import { parseContractError, type ContractErrorDetail } from '../utils/contractE
 export default function CrossAssetPayment() {
   const { notifySuccess, notifyError } = useNotification();
   const { socket } = useSocket();
-  const { address, connect } = useWallet();
+  const { address, connect, requireWallet } = useWallet();
   const { sign } = useWalletSigning();
   const [assetIn, setAssetIn] = useState('USDC');
   const [assetOut, setAssetOut] = useState('NGN');
@@ -103,8 +103,8 @@ export default function CrossAssetPayment() {
   }, [notifySuccess, socket, submissionTxHash]);
 
   const handleInitiate = async () => {
-    if (!address) {
-      notifyError('Wallet required', 'Connect your wallet before submitting cross-asset payment.');
+    const walletAddress = await requireWallet();
+    if (!walletAddress) {
       return;
     }
     if (!selectedPath) {
@@ -131,7 +131,7 @@ export default function CrossAssetPayment() {
 
       const result = await submitCrossAssetPayment({
         contractId,
-        sourceAddress: address,
+        sourceAddress: walletAddress,
         signTransaction: sign,
         amount: parsedAmount,
         fromAsset: assetIn,
