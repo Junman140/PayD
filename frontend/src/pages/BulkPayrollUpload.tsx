@@ -38,7 +38,10 @@ export default function BulkPayrollUpload() {
   const handleSubmit = () => {
     if (validRows.length === 0) return;
     // In production this would POST validRows to the backend payroll API
-    console.log('Submitting payroll batch:', validRows.map((r) => r.data));
+    console.log(
+      'Submitting payroll batch:',
+      validRows.map((r) => r.data)
+    );
     setSubmitted(true);
   };
 

@@ -123,13 +123,9 @@ export default function PayrollAnalytics() {
         </div>
       </Card>
 
-      {isLoading && (
-        <p className="text-center text-gray-500 py-12">Loading analytics…</p>
-      )}
+      {isLoading && <p className="text-center text-gray-500 py-12">Loading analytics…</p>}
 
-      {isError && (
-        <p className="text-center text-red-500 py-12">Failed to load analytics data.</p>
-      )}
+      {isError && <p className="text-center text-red-500 py-12">Failed to load analytics data.</p>}
 
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -141,7 +137,10 @@ export default function PayrollAnalytics() {
                 <LineChart data={data.trends}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                  <YAxis tick={{ fontSize: 12 }} tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`} />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
+                  />
                   <Tooltip formatter={(v: number) => [`$${v.toLocaleString()}`, 'Total']} />
                   <Legend />
                   <Line
