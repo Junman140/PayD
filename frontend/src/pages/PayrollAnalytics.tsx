@@ -48,8 +48,8 @@ interface AnalyticsData {
   paymentMetrics: PaymentMetric[];
 }
 
-// recharts v3 ValueType = number | string | Array<number | string>
-type RechartsValue = number | string | (number | string)[];
+// recharts v3 Formatter receives ValueType | undefined
+type RechartsValue = number | string | (number | string)[] | undefined;
 
 // ── Mock fetch (replace with real API call when endpoint is available) ────────
 
@@ -189,10 +189,10 @@ export default function PayrollAnalytics() {
                       currency,
                       value,
                     }: {
-                      currency: string;
-                      value: number;
+                      currency?: string;
+                      value?: number;
                       [key: string]: unknown;
-                    }) => `${currency} ${value}%`}
+                    }) => `${currency ?? ''} ${value ?? 0}%`}
                   >
                     {data.currencyBreakdown.map((_, idx) => (
                       <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} />

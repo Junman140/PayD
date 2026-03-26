@@ -293,7 +293,7 @@ export default function RevenueSplitDashboard() {
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(value: number | string | (number | string)[]) =>
+                      formatter={(value: number | string | (number | string)[] | undefined) =>
                         `${Number(Array.isArray(value) ? value[0] : (value ?? 0)).toFixed(2)}%`
                       }
                       contentStyle={{
