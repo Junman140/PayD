@@ -242,3 +242,9 @@ Run tests:
 ```bash
 npm run test
 ```
+
+## 🙌 Contributors
+
+We'd like to extend a huge thank you to everyone who has contributed to making PayD what it is today! For a full list of our amazing contributors, please see our [Contributors List](CONTRIBUTORS.md).
+
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors)
