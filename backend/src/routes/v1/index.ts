@@ -28,6 +28,7 @@ import feeRoutes from '../feeRoutes.js';
 import assetPathPaymentRoutes from '../assetPathPaymentRoutes.js';
 import tenantConfigRoutes from '../tenantConfigRoutes.js';
 import bulkPaymentRoutes from '../bulkPaymentRoutes.js';
+import scheduleRoutes from '../scheduleRoutes.js';
 
 const router = Router();
 
@@ -55,5 +56,6 @@ router.use('/fees', dataRateLimit(), feeRoutes);
 router.use('/path-payments', apiRateLimit(), assetPathPaymentRoutes);
 router.use('/tenant-configs', dataRateLimit(), tenantConfigRoutes);
 router.use('/bulk-payments', apiRateLimit(), bulkPaymentRoutes);
+router.use('/schedules', apiRateLimit(), scheduleRoutes);
 
 export default router;
