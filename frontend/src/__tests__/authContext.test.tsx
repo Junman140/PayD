@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { AuthProvider } from '../../providers/AuthProvider';
+import { AuthProvider, useAuth } from '../../providers/AuthProvider';
 import ProtectedRoute from '../../components/ProtectedRoute';
 
 function createMockToken(role: string = 'EMPLOYER'): string {
@@ -11,50 +11,38 @@ function createMockToken(role: string = 'EMPLOYER'): string {
   return `${header}.${payload}.${signature}`;
 }
 
+function AuthStatus(): React.ReactElement {
+  const { isAuthenticated, user } = useAuth();
+  return (
+    <div>
+      <span data-testid="auth">{isAuthenticated ? 'yes' : 'no'}</span>
+      <span data-testid="role">{user?.role ?? 'none'}</span>
+    </div>
+  );
+}
+
 describe('AuthProvider', () => {
   beforeEach(() => {
     localStorage.clear();
   });
 
-  it('should start with no user when no token in localStorage', () => {
-    const TestComponent = () => {
-      let authError = false;
-      try {
-        // This will throw if AuthProvider is not wrapping
-        const { useAuth } = require('../../providers/AuthProvider');
-        useAuth();
-      } catch {
-        authError = true;
-      }
-      return <div>{authError ? 'error' : 'ok'}</div>;
-    };
-
+  it('should provide auth context to children', () => {
     render(
       <AuthProvider>
-        <TestComponent />
+        <AuthStatus />
       </AuthProvider>
     );
-    expect(screen.getByText('ok')).toBeInTheDocument();
+    expect(screen.getByTestId('auth')).toHaveTextContent('no');
+    expect(screen.getByTestId('role')).toHaveTextContent('none');
   });
 
   it('should decode and load user from valid token in localStorage', () => {
     const token = createMockToken('EMPLOYER');
     localStorage.setItem('payd_auth_token', token);
 
-    const TestComponent = () => {
-      const { useAuth } = require('../../providers/AuthProvider');
-      const { isAuthenticated, user } = useAuth();
-      return (
-        <div>
-          <span data-testid="auth">{isAuthenticated ? 'yes' : 'no'}</span>
-          <span data-testid="role">{user?.role || 'none'}</span>
-        </div>
-      );
-    };
-
     render(
       <AuthProvider>
-        <TestComponent />
+        <AuthStatus />
       </AuthProvider>
     );
 
