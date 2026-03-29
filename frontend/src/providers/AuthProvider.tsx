@@ -41,7 +41,7 @@ function decodeJwtPayload(token: string): User | null {
       id: payload.sub ?? payload.id ?? '',
       email: payload.email ?? '',
       name: payload.name ?? '',
-      role: (payload.role === 'EMPLOYER' || payload.role === 'EMPLOYEE') ? payload.role : 'EMPLOYEE',
+      role: payload.role === 'EMPLOYER' || payload.role === 'EMPLOYEE' ? payload.role : 'EMPLOYEE',
       picture: payload.picture,
     };
   } catch {
