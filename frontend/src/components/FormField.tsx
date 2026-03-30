@@ -68,9 +68,12 @@ export const FormField: React.FC<FormFieldProps> = ({
               id,
               'aria-invalid': hasError,
               'aria-describedby': hasError || helpText ? descriptionId : undefined,
-              className: `${(children.props as Record<string, unknown>).className || ''} ${
-                hasError ? 'border-danger focus:border-danger focus:ring-danger/20' : ''
-              }`.trim(),
+              className: [
+                typeof (children.props as Record<string, unknown>).className === 'string' 
+                  ? (children.props as Record<string, unknown>).className 
+                  : '',
+                hasError ? 'border-danger focus:border-danger focus:ring-danger/20' : '',
+              ].filter(Boolean).join(' '),
             } as React.HTMLAttributes<HTMLElement>)
           : children}
       </div>

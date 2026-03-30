@@ -386,18 +386,20 @@ export default function UpgradeConfirmModal({
 
   // ── Cancel (only valid for pre-execution states) ─────────────────────────
 
-  async function handleCancel() {
-    if (modal.step === 'review' || modal.step === 'authorize') {
+  const handleCancel = useCallback(async () => {
+    if (modal.step === 'review' || modal.step === 'authorize' || modal.step === 'executing') {
       try {
-        const logId = modal.upgradeLogId;
-        await cancelUpgrade(logId);
+        const logId = 'upgradeLogId' in modal ? modal.upgradeLogId : null;
+        if (logId) {
+          await cancelUpgrade(logId);
+        }
       } catch {
         // Best-effort cancel; ignore errors
       }
     }
     clearPoll();
     onClose();
-  }
+  }, [modal, clearPoll, onClose]);
 
   // ── Copy to clipboard helper ─────────────────────────────────────────────
 

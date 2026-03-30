@@ -1,4 +1,6 @@
-import React, { createContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { useState, useEffect, useCallback, ReactNode } from 'react';
+import { TOKEN_KEY } from './authConstants';
+import { AuthContext, type AuthContextType } from './AuthContext';
 
 interface User {
   id: string;
@@ -7,20 +9,6 @@ interface User {
   role: 'EMPLOYER' | 'EMPLOYEE';
   picture?: string;
 }
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (provider: 'google' | 'github') => void;
-  logout: () => void;
-  setTokenFromCallback: (token: string) => void;
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const TOKEN_KEY = 'payd_auth_token';
 
 interface JwtPayload {
   sub?: string;
@@ -101,14 +89,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return <AuthContext value={value}>{children}</AuthContext>;
-}
-
-export function useAuth(): AuthContextType {
-  const context = React.useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
 }
 
 export default AuthContext;
