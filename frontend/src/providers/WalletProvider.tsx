@@ -1,75 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-  StellarWalletsKit,
-  WalletNetwork,
-  FreighterModule,
-  FREIGHTER_ID,
-  xBullModule,
-  LobstrModule,
-  LOBSTR_ID,
-} from '@creit.tech/stellar-wallets-kit';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNotification } from '../hooks/useNotification';
 import { WalletContext } from '../hooks/useWallet';
+import { useWalletManager } from '../hooks/useWalletManager';
 
-const LAST_WALLET_STORAGE_KEY = 'payd:last_wallet_name';
-const SUPPORTED_MODAL_WALLETS = [FREIGHTER_ID, LOBSTR_ID] as const;
-const WALLET_CONNECTION_TIMEOUT_MS = 15000;
-const WALLET_CONNECTION_TIMEOUT_MESSAGE =
-  'Wallet connection timed out after 15 seconds. Confirm the request in your wallet and try again.';
-
-type SelectableWallet = {
-  id: string;
-  name: string;
-  icon?: string;
-  isAvailable: boolean;
-};
-
-function withWalletConnectionTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
-  return new Promise<T>((resolve, reject) => {
-    const timeoutId = window.setTimeout(() => {
-      reject(new Error(WALLET_CONNECTION_TIMEOUT_MESSAGE));
-    }, timeoutMs);
-
-    promise.then(
-      (value) => {
-        window.clearTimeout(timeoutId);
-        resolve(value);
-      },
-      (error: unknown) => {
-        window.clearTimeout(timeoutId);
-        reject(error instanceof Error ? error : new Error(String(error)));
-      }
-    );
-  });
-}
-
-function hasAnyWalletExtension(): boolean {
-  if (typeof window === 'undefined') return true;
-  const extendedWindow = window as Window &
-    typeof globalThis & {
-      freighterApi?: unknown;
-      xBullSDK?: unknown;
-      lobstr?: unknown;
-    };
-
-  return Boolean(extendedWindow.freighterApi || extendedWindow.xBullSDK || extendedWindow.lobstr);
-}
-
-export const WalletProvider: React.FC<{
-  children: React.ReactNode;
-  connectionTimeoutMs?: number;
-}> = ({ children, connectionTimeoutMs = WALLET_CONNECTION_TIMEOUT_MS }) => {
-  const [address, setAddress] = useState<string | null>(null);
-  const [walletName, setWalletName] = useState<string | null>(null);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [walletExtensionAvailable, setWalletExtensionAvailable] = useState(true);
-  const [network, setNetwork] = useState<'TESTNET' | 'PUBLIC'>('TESTNET');
-  const [walletModalOpen, setWalletModalOpen] = useState(false);
-  const [walletOptions, setWalletOptions] = useState<SelectableWallet[]>([]);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
-  const kitRef = useRef<StellarWalletsKit | null>(null);
+export const WalletProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { t } = useTranslation();
   const { notifyWalletEvent } = useNotification();
 
@@ -171,32 +105,11 @@ export const WalletProvider: React.FC<{
       return null;
     }
     setConnectionError(null);
-    setWalletModalOpen(true);
-    return null;
-  };
-
-  const requireWallet = async (): Promise<string | null> => {
-    if (address) return address;
-    notifyWalletEvent('required', 'Connect your wallet to continue with this contract action.');
-    return connect();
-  };
-
-  const disconnect = () => {
-    const kit = kitRef.current;
-    if (kit) {
-      void kit.disconnect();
+    const result = await baseConnectWithWallet(walletId);
+    if (!result) {
+      setConnectionError('Unable to connect to the selected wallet. Please try again.');
     }
-    setAddress(null);
-    setWalletName(null);
-    localStorage.removeItem(LAST_WALLET_STORAGE_KEY);
-    notifyWalletEvent('disconnected');
-  };
-
-  const signTransaction = async (xdr: string) => {
-    const kit = kitRef.current;
-    if (!kit) throw new Error('Wallet kit not initialized');
-    const result = await kit.signTransaction(xdr);
-    return result.signedTxXdr;
+    return result;
   };
 
   return (
